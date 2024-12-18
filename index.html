@@ -40,6 +40,7 @@
 			API_KEY = apiInput.value
 			
 			// Save user input in global messages array
+			window.messages.push({ role: "system", content: "1. 如果你收到了一个描述，则基于之前的数据，给出它的分类和责任单位，使用json回答问题，其他的什么也不要回答 2. 如果用户问题和分类与责任单位无关，正常回答" })
 			window.messages.push({ role: "user", content: promptInput.value });
 
 			// Toggle button states to prevent multiple requests
