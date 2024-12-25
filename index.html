@@ -6,9 +6,9 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>LLM Access</title>
 		<script>
-			const API_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions";
+			API_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions";
 			API_KEY = "";
-
+			
 			// Ensure the global `messages` array exists on the window object to store chat history
 			if (!window.messages) {
 				window.messages = [];
@@ -21,6 +21,8 @@
 			// UI elements from the page
 			const promptInput = document.getElementById("promptInput");
 			const apiInput = document.getElementById("apiInput");
+			const baseUrlInput = document.getElementById("baseUrlInput");
+			const modelInput = document.getElementById("modelInput");
 			const generateBtn = document.getElementById("generateBtn");
 			const stopBtn = document.getElementById("stopBtn");
 			const resultText = document.getElementById("resultText");
@@ -36,11 +38,99 @@
 				return;
 			}
 
-			// Set api_key
+			API_URL = baseUrlInput.value
 			API_KEY = apiInput.value
+			MODEL_NAME = modelInput.value
 			
 			// Save user input in global messages array
-			window.messages.push({ role: "system", content: "如果你收到了名词或者描述，基于之前的数据：给出它的分类和责任单位，使用json回答问题，其他的什么也不要回答" })
+			window.messages.push({ role: "system", content: `如果你收到了名词或者描述，基于json格式的类别数据，给出它的分类和责任单位，使用json回答问题，其他的什么也不要回答，类别数据：
+[
+    {
+        "description": "社会消费品零售总额增长5%左右",
+        "indicator": "社会消费指标",
+        "department": "市商务局",
+        "areas": "各区镇"
+    },
+    {
+        "description": "实际使用外资保持在11亿美元左右，进出口总额保持稳定",
+        "indicator": "外资外贸指标",
+        "department": "市商务局",
+        "areas": "各区镇"
+    },
+    {
+        "description": "全社会研发投入占地区生产总值比重提高至4%左右",
+        "indicator": "科技研发指标",
+        "department": "市科技局",
+        "areas": "各区镇"
+    },
+    {
+        "description": "居民人均可支配收入和经济增长基本同步，城镇调查失业率控制在5%以内",
+        "indicator": "民生改善指标",
+        "department": "市发改委、人社局",
+        "areas": "各区镇"
+    },
+    {
+        "description": "节能减排完成上级下达任务",
+        "indicator": "节能环保指标",
+        "department": "市发改委、工信局，生态环境局",
+        "areas": "各区镇"
+    },
+    {
+        "description": "地区生产总值增长5%以上",
+        "indicator": "经济总量指标",
+        "department": "市发改委",
+        "areas": "各区镇"
+    },
+    {
+        "description": "一般公共预算收入同口径增长4%以上",
+        "indicator": "财政收入指标",
+        "department": "市财政局,市税务局",
+        "areas": ""
+    },
+    {
+        "description": "规上工业总产值增长5.5%以上",
+        "indicator": "工业增速指标",
+        "department": "市工信局",
+        "areas": "各区镇"
+    },
+    {
+        "description": "全社会固定资产投资增长6%以上",
+        "indicator": "固定资产投资指标",
+        "department": "市发改委",
+        "areas": "各区镇"
+    },
+    {
+        "description": "社会消费品零售总额增长5.5%",
+        "indicator": "社会消费指标",
+        "department": "市商务局",
+        "areas": "各区镇"
+    },
+    {
+        "description": "实际使用外资11亿美元，进出口总额保持稳定",
+        "indicator": "外资外贸指标",
+        "department": "市商务局",
+        "areas": "各区镇"
+    },
+    {
+        "description": "全社会研发投入占地区生产总值比重3.85%左右",
+        "indicator": "科技研发指标",
+        "department": "市科技局",
+        "areas": "各区镇"
+    },
+    {
+        "description": "居民人均可支配收入与经济增长基本同步，城镇调查失业率控制在5%以内",
+        "indicator": "民生改善指标",
+        "department": "市发改委、人社局",
+        "areas": "各区镇"
+    },
+    {
+        "description": "",
+        "indicator": "节能环保指标",
+        "department": "市发改委、工信局，生态环境局",
+        "areas": "各区镇"
+    }
+]
+` })
 			window.messages.push({ role: "user", content: promptInput.value });
 
 			// Toggle button states to prevent multiple requests
@@ -63,7 +153,7 @@
 						Authorization: `Bearer ${API_KEY}`,
 						},
 					body: JSON.stringify({
-						model: "qwen-plus",
+						model: MODEL_NAME,
 						temperature: 0.5,
 						messages: window.messages,
 						max_tokens: 8000,
@@ -187,7 +277,7 @@
 				margin: 0;
 			}
 			.chat {
-				min-height: 500px;
+				min-height: 400px;
 				max-height: 500px;
 				overflow-y: auto; /* Enables vertical scrolling */
 				background-color: #2f3136;
@@ -251,11 +341,15 @@
 			</div>
 			<div class="input-area">
 				<input id="promptInput" type="text" placeholder="Enter prompt..." class="long-input"/>
-				<input id="apiInput" type="password" placeholder="Enter your api key..." class="short-input"/>
 				<button id="generateBtn" onclick="generate()">Generate</button>
 				<button id="stopBtn" onclick="stop()">Stop</button>
 				<button id="clearBtn" onclick="clearInput()">Clear Context</button>
 			</div>
+			<div class="input-area">
+                <input id="apiInput" type="password" placeholder="Enter your api key..." class="short-input"/>
+                <input id="baseUrlInput" type="text" placeholder="Enter base URL..." class="short-input", value="https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"/>
+                <input id="modelInput" type="text" placeholder="Enter model..." class="short-input", value="qwen-plus"/>
+            </div>
 		</div>
 	</body>
 </html>
